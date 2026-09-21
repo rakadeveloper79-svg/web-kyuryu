@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Theme Initialization: dijalankan sedini mungkin agar tidak ada flash Dark Mode -->
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem('kyuryu-theme');
+        if (savedTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KyuryuSMP — Premium Survival Minecraft Server</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              900: '#78350f',
+            },
+            surface: {
+              50: '#fafafa',
+              100: '#f4f4f5',
+              200: '#e4e4e7',
+              800: '#27272a',
+              900: '#18181b',
+              950: '#09090b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #fafafa;
+      color: #18181b;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Skeleton Loading Animasi Smooth */
+    .skeleton {
+      background: linear-gradient(90deg, #e4e4e7 25%, #f4f4f5 50%, #e4e4e7 75%);
+      background-size: 200% 100%;
+      animation: skeleton-wave 1.5s ease-in-out infinite;
+    }
+    @keyframes skeleton-wave {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Transisi Halaman Smooth */
+    .page-fade {
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Animation Slide Mobile Menu Drawer */
+    #mobile-drawer {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #mobile-backdrop {
+      transition: opacity 0.3s ease;
+    }
+
+    /* Custom Scrollbar minimalis */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Red Dot Indicator */
+    .nav-red-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background-color: #ef4444;
+      border-radius: 9999px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    /* Carousel Utilities & Aspect Ratio Fix */
+    .hero-carousel-wrapper {
+      width: 100vw;
+      position: relative;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
+      background-color: #18181b;
+    }
+
+    .hero-carousel-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 768px) {
+      .hero-carousel-container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+    }
+
+    .hero-carousel {
+      width: 100%;
+      aspect-ratio: 1536 / 614;
+      overflow: hidden;
+      position: relative;
+    }
+
+    @media (min-width: 768px) {
+      .hero-carousel {
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+      height: 100%;
+    }
+    .carousel-slide {
+      min-width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ==========================================================
+       DARK MODE THEME SYSTEM
+       Diterapkan via override CSS variable + class-selector di atas
+       Tailwind existing, sehingga HTML & Light Mode asli tidak disentuh.
+       ========================================================== */
+    :root {
+      --dm-bg: #0b0d0f;
+      --dm-surface: #111418;
+      --dm-card: #15191e;
+      --dm-elevated: #191e24;
+      --dm-elevated-hover: #1f242a;
+      --dm-border: #252b33;
+      --dm-border-hover: #343b45;
+      --dm-text-primary: #f3f4f6;
+      --dm-text-secondary: #a1a7b0;
+      --dm-text-muted: #737a84;
+    }
+
+    /* Smooth, subtle theme transition (tidak mengganggu transition existing
+       karena selector Tailwind seperti .transition-all/.transition-colors
+       punya spesifisitas class yang sama dan ditulis lebih akhir oleh Tailwind) */
+    body, body * {
+      transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+    }
+
+    /* ---------- Base page ---------- */
+    html.dark body.bg-surface-50 {
+      background-color: var(--dm-bg);
+      color: var(--dm-text-primary);
+    }
+
+    /* ---------- Header ---------- */
+    html.dark header.bg-surface-50\/90 {
+      background-color: rgba(11, 13, 15, 0.9);
+    }
+    html.dark .border-surface-200\/80 { border-color: var(--dm-border); }
+
+    /* ---------- Generic surfaces (order matters least: specificity handles it) ---------- */
+    html.dark .bg-white { background-color: var(--dm-card); }
+    html.dark .bg-white\/50 { background-color: rgba(255, 255, 255, 0.08); }
+    html.dark .bg-surface-50\/50 { background-color: rgba(21, 25, 30, 0.6); }
+    html.dark .bg-surface-50\/30 { background-color: rgba(21, 25, 30, 0.4); }
+    html.dark .bg-surface-100 { background-color: var(--dm-elevated); }
+    html.dark .bg-surface-200 { background-color: var(--dm-border-hover); }
+    html.dark .bg-surface-50 { background-color: var(--dm-elevated); }
+
+    /* surface-950 / 800 dipakai sebagai tombol "dark" di Light Mode.
+       Di Dark Mode dijadikan elevated surface + border supaya tidak melebur
+       dengan background halaman yang sudah gelap. */
+    html.dark .bg-surface-950 {
+      background-color: var(--dm-elevated);
+      border-color: var(--dm-border);
+    }
+    html.dark .hover\:bg-surface-950:hover { background-color: var(--dm-elevated-hover); }
+    html.dark .hover\:bg-surface-800:hover { background-color: var(--dm-border-hover); }
+    html.dark .bg-surface-800 { background-color: var(--dm-elevated); }
+    html.dark .border-surface-800 { border-color: var(--dm-border); }
+
+    /* Overlay/backdrop/gradient di atas gambar (carousel, drawer backdrop)
+       sengaja TIDAK diubah supaya tetap kontras terhadap foto di kedua mode. */
+
+    /* ---------- Borders ---------- */
+    html.dark .border-surface-100 { border-color: var(--dm-border); }
+    html.dark .border-surface-200 { border-color: var(--dm-border); }
+    html.dark .border-surface-200\/60 { border-color: var(--dm-border); }
+
+    /* ---------- Text ---------- */
+    html.dark .text-surface-950 { color: var(--dm-text-primary); }
+    html.dark .text-surface-900 { color: var(--dm-text-primary); }
+    html.dark .text-surface-800 { color: var(--dm-text-secondary); }
+    html.dark .text-surface-700 { color: var(--dm-text-secondary); }
+    html.dark .text-surface-600 { color: var(--dm-text-secondary); }
+    html.dark .text-surface-500 { color: var(--dm-text-muted); }
+    html.dark .text-surface-400 { color: var(--dm-text-muted); }
+    html.dark .hover\:text-surface-900:hover { color: var(--dm-text-primary); }
+    html.dark .hover\:text-surface-950:hover { color: var(--dm-text-primary); }
+    html.dark .active\:bg-surface-100:active { background-color: var(--dm-elevated-hover); }
+    html.dark .hover\:bg-surface-100:hover { background-color: var(--dm-elevated-hover); }
+    html.dark .hover\:bg-surface-50:hover { background-color: var(--dm-elevated); }
+
+    /* ---------- Brand accent (tetap identitas oranye/gold, hanya disesuaikan agar nyaman di dark) ---------- */
+    html.dark .bg-brand-50 { background-color: rgba(217, 119, 6, 0.14); }
+    html.dark .bg-brand-50\/30 { background-color: rgba(217, 119, 6, 0.08); }
+    html.dark .bg-brand-100 { background-color: rgba(217, 119, 6, 0.2); }
+    html.dark .border-brand-200 { border-color: rgba(217, 119, 6, 0.35); }
+    html.dark .text-brand-700 { color: #fbbf24; }
+    html.dark .text-brand-800 { color: #fbbf24; }
+    html.dark .text-brand-900 { color: #fcd34d; }
+
+    /* ---------- Colored badge/icon chips (dipertahankan warnanya, hanya disesuaikan kontras) ---------- */
+    html.dark .bg-emerald-50 { background-color: rgba(5, 150, 105, 0.15); }
+    html.dark .bg-emerald-100 { background-color: rgba(5, 150, 105, 0.2); }
+    html.dark .hover\:bg-emerald-50:hover { background-color: rgba(5, 150, 105, 0.22); }
+    html.dark .hover\:bg-emerald-100:hover { background-color: rgba(5, 150, 105, 0.28); }
+    html.dark .text-emerald-600 { color: #34d399; }
+    html.dark .text-emerald-700 { color: #34d399; }
+    html.dark .text-emerald-800 { color: #6ee7b7; }
+
+    html.dark .bg-purple-50 { background-color: rgba(147, 51, 234, 0.15); }
+    html.dark .bg-purple-100 { background-color: rgba(147, 51, 234, 0.2); }
+    html.dark .border-purple-200 { border-color: rgba(147, 51, 234, 0.35); }
+    html.dark .text-purple-600 { color: #c084fc; }
+    html.dark .text-purple-700 { color: #c084fc; }
+
+    html.dark .bg-red-50 { background-color: rgba(220, 38, 38, 0.15); }
+    html.dark .bg-red-100 { background-color: rgba(220, 38, 38, 0.2); }
+    html.dark .border-red-200 { border-color: rgba(220, 38, 38, 0.35); }
+    html.dark .text-red-700 { color: #f87171; }
+
+    html.dark .bg-sky-50 { background-color: rgba(2, 132, 199, 0.15); }
+    html.dark .bg-sky-100 { background-color: rgba(2, 132, 199, 0.2); }
+    html.dark .border-sky-200 { border-color: rgba(2, 132, 199, 0.35); }
+    html.dark .text-sky-600 { color: #38bdf8; }
+    html.dark .text-sky-700 { color: #38bdf8; }
+
+    html.dark .bg-rose-50 { background-color: rgba(225, 29, 72, 0.15); }
+    html.dark .bg-rose-100 { background-color: rgba(225, 29, 72, 0.2); }
+    html.dark .border-rose-200 { border-color: rgba(225, 29, 72, 0.35); }
+    html.dark .text-rose-500 { color: #fb7185; }
+    html.dark .text-rose-600 { color: #fb7185; }
+    html.dark .text-rose-700 { color: #fb7185; }
+
+    html.dark .bg-stone-200 { background-color: rgba(214, 211, 209, 0.18); }
+    html.dark .text-stone-800 { color: #d6d3d1; }
+
+    html.dark .text-blue-600 { color: #60a5fa; }
+
+    /* ---------- Scrollbar (Light Mode existing tidak diubah) ---------- */
+    html.dark ::-webkit-scrollbar-track { background: var(--dm-bg); }
+    html.dark ::-webkit-scrollbar-thumb { background: #3a4048; }
+    html.dark ::-webkit-scrollbar-thumb:hover { background: #4b525c; }
+
+    /* ---------- Skeleton loading tetap berfungsi, gradasi disesuaikan ---------- */
+    html.dark .skeleton {
+      background: linear-gradient(90deg, #191e24 25%, #21262d 50%, #191e24 75%);
+      background-size: 200% 100%;
+    }
+
+    /* ---------- Theme toggle button ---------- */
+    .theme-toggle-btn i.fa-sun { color: #fbbf24; }
+  </style>
+</head>
+<body class="font-sans antialiased text-surface-900 bg-surface-50 min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden items-center gap-3 px-4 py-3 bg-surface-950 text-white rounded-xl shadow-lg border border-surface-800 text-sm font-medium transition-all">
+    <i class="fa-solid fa-circle-check text-emerald-400 text-base" id="toast-icon"></i>
+    <span id="toast-message">IP Berhasil disalin!</span>
+  </div>
+
+  <!-- HEADER & NAVIGATION -->
+  <header class="sticky top-0 z-40 bg-surface-50/90 backdrop-blur-md border-b border-surface-200/80 transition-all">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-2.5 font-display font-bold text-xl tracking-tight text-surface-950 hover:opacity-80 transition-opacity">
+        <div class="w-8 h-8 rounded-lg bg-surface-950 flex items-center justify-center text-white text-sm">
+          <i class="fa-solid fa-dragon"></i>
+        </div>
+        <span>Kyuryu<span class="text-brand-600">SMP</span></span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-1 font-medium text-sm text-surface-600">
+        <a href="#" class="px-3 py-1.5 hover:text-surface-950 transition-colors rounded-lg hover:bg-surface-100">Home</a>
+        <button onclick="navigateToSection('features')" class="px-3 py-1.5 hover:text-surface-950 transition-colors rounded-lg hover:bg-surface-100">Fitur</button>
+        <button onclick="navigateToSection('creator-rewards')" class="px-3 py-1.5 hover:text-surface-950 transition-colors rounded-lg hover:bg-surface-100">Creator</button>
+        <button onclick="navigateToSection('rules')" class="px-3 py-1.5 hover:text-surface-950 transition-colors rounded-lg hover:bg-surface-100">Aturan</button>
+        <a href="#events" class="px-3 py-1.5 hover:text-surface-950 transition-colors rounded-lg hover:bg-surface-100 flex items-center">Event <span id="dot-events-desktop" class="nav-red-dot hidden"></span></a>
+        <a href="#info" class="px-3 py-1.5 hover:text-surface-950 transition-colors rounded-lg hover:bg-surface-100 flex items-center">Info <span id="dot-info-desktop" class="nav-red-dot hidden"></span></a>
+        <a href="#faq" class="px-3 py-1.5 hover:text-surface-950 transition-colors rounded-lg hover:bg-surface-100 flex items-center">FAQ <span id="dot-faq-desktop" class="nav-red-dot hidden"></span></a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="hidden md:flex items-center gap-2">
+        <a href="http://basic-4.mineidhost.com:19318" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 text-xs font-semibold text-surface-700 bg-surface-100 hover:bg-surface-200 rounded-lg transition-colors inline-flex items-center gap-1.5">
+          <i class="fa-solid fa-map-location-dot text-emerald-600"></i> Live Map
+        </a>
+
+        <button onclick="switchPage('ranks')" id="btn-nav-ranks" class="px-3 py-1.5 text-xs font-semibold text-brand-900 bg-brand-100 hover:bg-brand-500 hover:text-white rounded-lg transition-colors inline-flex items-center gap-1.5">
+          <i class="fa-solid fa-crown text-brand-600"></i> Rank
+        </button>
+
+        <button onclick="switchPage('staff')" id="btn-nav-staff" class="px-3 py-1.5 text-xs font-semibold text-surface-950 bg-surface-200 hover:bg-surface-950 hover:text-white rounded-lg transition-colors inline-flex items-center gap-1.5">
+          Staff
+        </button>
+
+        <a href="https://web.kyuryu.my.id/penel.html" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 text-xs font-semibold text-white bg-surface-950 hover:bg-surface-800 rounded-lg transition-colors inline-flex items-center gap-1.5">
+          <i class="fa-solid fa-server text-xs"></i> Panel
+        </a>
+
+        <!-- Theme Toggle (Desktop) -->
+        <button onclick="toggleTheme()" class="theme-toggle-btn w-9 h-9 rounded-lg bg-surface-100 hover:bg-surface-200 border border-surface-200 flex items-center justify-center text-surface-700 transition-all focus:outline-none active:scale-95" id="theme-toggle-desktop" aria-label="Aktifkan dark mode" title="Aktifkan dark mode">
+          <i class="fa-solid fa-moon text-sm" id="theme-icon-desktop"></i>
+        </button>
+      </div>
+
+      <!-- Mobile Header Right Group: Theme Toggle + Hamburger -->
+      <div class="md:hidden flex items-center gap-2">
+        <!-- Theme Toggle (Mobile) -->
+        <button onclick="toggleTheme()" class="theme-toggle-btn w-10 h-10 rounded-xl bg-surface-100 hover:bg-surface-200 border border-surface-200 flex items-center justify-center text-surface-900 transition-all focus:outline-none active:scale-95" id="theme-toggle-mobile" aria-label="Aktifkan dark mode" title="Aktifkan dark mode">
+          <i class="fa-solid fa-moon text-base" id="theme-icon-mobile"></i>
+        </button>
+
+        <!-- Mobile Hamburger Button Redesigned -->
+        <button onclick="toggleMobileMenu()" class="w-10 h-10 rounded-xl bg-surface-100 hover:bg-surface-200 border border-surface-200 flex items-center justify-center text-surface-900 transition-all focus:outline-none active:scale-95 relative" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars text-base transition-transform duration-200" id="menu-icon"></i>
+          <span id="dot-mobile-trigger" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MOBILE SLIDE-OVER NAVIGATION MENU -->
+  <div id="mobile-menu-wrapper" class="fixed inset-0 z-50 pointer-events-none md:hidden">
+    <!-- Dimmed Backdrop Overlay -->
+    <div id="mobile-backdrop" onclick="toggleMobileMenu()" class="absolute inset-0 bg-surface-950/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+    <!-- Right Drawer Panel -->
+    <div id="mobile-drawer" class="absolute top-0 right-0 w-[85%] max-w-sm h-full bg-white shadow-2xl border-l border-surface-200 translate-x-full flex flex-col justify-between overflow-y-auto pointer-events-auto transition-transform duration-300">
+      
+      <!-- Drawer Header -->
+      <div class="p-5 border-b border-surface-100 flex items-center justify-between">
+        <div class="flex items-center gap-2 font-display font-bold text-lg text-surface-950">
+          <div class="w-7 h-7 rounded-lg bg-surface-950 flex items-center justify-center text-white text-xs">
+            <i class="fa-solid fa-dragon"></i>
+          </div>
+          <span>Kyuryu<span class="text-brand-600">SMP</span></span>
+        </div>
+        <button onclick="toggleMobileMenu()" class="w-8 h-8 rounded-lg bg-surface-100 hover:bg-surface-200 flex items-center justify-center text-surface-600 text-sm focus:outline-none">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Content Links -->
+      <div class="p-5 space-y-6 flex-1">
+        
+        <!-- Group 1: Navigasi Utama -->
+        <div class="space-y-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-surface-400 px-3">Menu Utama</span>
+          <a href="#" onclick="toggleMobileMenu()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-surface-900 hover:bg-surface-50 active:bg-surface-100 transition-colors">
+            <i class="fa-solid fa-house text-surface-400 w-5"></i>
+            <span>Home</span>
+          </a>
+          <button onclick="navigateToSection('features'); toggleMobileMenu()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-surface-700 hover:bg-surface-50 active:bg-surface-100 transition-colors text-left">
+            <i class="fa-solid fa-layer-group text-surface-400 w-5"></i>
+            <span>Fitur Server</span>
+          </button>
+          <button onclick="navigateToSection('creator-rewards'); toggleMobileMenu()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-surface-700 hover:bg-surface-50 active:bg-surface-100 transition-colors text-left">
+            <i class="fa-solid fa-clapperboard text-surface-400 w-5"></i>
+            <span>Reward Creator</span>
+          </button>
+          <button onclick="navigateToSection('rules'); toggleMobileMenu()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-surface-700 hover:bg-surface-50 active:bg-surface-100 transition-colors text-left">
+            <i class="fa-solid fa-shield text-surface-400 w-5"></i>
+            <span>Aturan Server</span>
+          </button>
+        </div>
+
+        <!-- Group 2: Komunitas, Informasi & FAQ -->
+        <div class="space-y-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-surface-400 px-3">Bantuan & Update</span>
+          <a href="#events" onclick="toggleMobileMenu()" class="flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm text-surface-700 hover:bg-surface-50 transition-colors">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-calendar-check text-rose-500 w-5"></i>
+              <span>Event List <span id="dot-events-mobile" class="nav-red-dot hidden"></span></span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-surface-400"></i>
+          </a>
+          <a href="#info" onclick="toggleMobileMenu()" class="flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm text-surface-700 hover:bg-surface-50 transition-colors">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-newspaper text-sky-500 w-5"></i>
+              <span>Informasi Terbaru <span id="dot-info-mobile" class="nav-red-dot hidden"></span></span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-surface-400"></i>
+          </a>
+          <!-- FAQ Button Added -->
+          <a href="#faq" onclick="toggleMobileMenu()" class="flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm text-surface-700 hover:bg-surface-50 transition-colors">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-circle-question text-brand-500 w-5"></i>
+              <span>FAQ (Pertanyaan Umum) <span id="dot-faq-mobile" class="nav-red-dot hidden"></span></span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-surface-400"></i>
+          </a>
+        </div>
+
+        <!-- Group 3: Akses Cepat (Rank & Staff) -->
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button onclick="switchPage('ranks'); toggleMobileMenu()" class="flex flex-col items-center justify-center p-3 rounded-xl bg-brand-50 border border-brand-200 text-brand-900 hover:bg-brand-100 transition-colors text-center space-y-1">
+            <i class="fa-solid fa-crown text-brand-600 text-base"></i>
+            <span class="text-xs font-bold">List Rank</span>
+          </button>
+          <button onclick="switchPage('staff'); toggleMobileMenu()" class="flex flex-col items-center justify-center p-3 rounded-xl bg-surface-100 border border-surface-200 text-surface-900 hover:bg-surface-200 transition-colors text-center space-y-1">
+            <i class="fa-solid fa-users text-surface-700 text-base"></i>
+            <span class="text-xs font-bold">Tim Staff</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Drawer Footer Action Buttons -->
+      <div class="p-5 border-t border-surface-100 bg-surface-50/50 space-y-2">
+        <a href="http://basic-4.mineidhost.com:19318" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold text-xs rounded-xl border border-emerald-200 transition-colors flex items-center justify-center gap-2">
+          <i class="fa-solid fa-map-location-dot"></i> Buka Live Map Server
+        </a>
+        <a href="https://web.kyuryu.my.id/penel.html" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-surface-950 hover:bg-surface-800 text-white font-semibold text-xs rounded-xl transition-colors flex items-center justify-center gap-2">
+          <i class="fa-solid fa-server"></i> Akses Panel Publik
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HERO CAROUSEL CONTAINER (UPDATED EDGE-TO-EDGE & BREAKOUT) -->
+  <div id="carousel-section" class="hero-carousel-wrapper py-4 md:py-6 hidden">
+    <div class="hero-carousel-container">
+      <div class="hero-carousel relative overflow-hidden group">
+        
+        <!-- Track Slides -->
+        <div id="carousel-track" class="carousel-track"></div>
+
+        <!-- Navigation Arrows -->
+        <button onclick="moveCarousel(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-950/60 text-white backdrop-blur-md border border-white/20 hidden md:flex items-center justify-center hover:bg-surface-950 transition-all opacity-0 group-hover:opacity-100 z-10">
+          <i class="fa-solid fa-chevron-left text-sm"></i>
+        </button>
+        <button onclick="moveCarousel(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-950/60 text-white backdrop-blur-md border border-white/20 hidden md:flex items-center justify-center hover:bg-surface-950 transition-all opacity-0 group-hover:opacity-100 z-10">
+          <i class="fa-solid fa-chevron-right text-sm"></i>
+        </button>
+
+        <!-- Indicator Dots -->
+        <div id="carousel-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 1: HOME ==================== -->
+  <main id="page-home" class="page-container page-fade">
+    
+    <!-- HERO SECTION -->
+    <section class="py-16 sm:py-24 px-4 sm:px-6 max-w-6xl mx-auto">
+      <div class="max-w-3xl space-y-6">
+        
+        <!-- Status Indicator Badge -->
+        <div id="server-status-badge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-100 border border-surface-200 text-xs font-medium text-surface-700">
+          <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <span id="server-status-text">Memuat status server...</span>
+        </div>
+
+        <h1 class="font-display text-4xl sm:text-6xl font-extrabold text-surface-950 tracking-tight leading-[1.1]">
+          Pengalaman Survival Minecraft <span class="text-brand-600">Cross-Platform</span> Terbaik.
+        </h1>
+
+        <p class="text-surface-600 text-base sm:text-lg leading-relaxed max-w-2xl">
+          Bergabunglah dengan komunitas KyuryuSMP. Ekosistem survival terstruktur dengan ekonomi seimbang, sistem proteksi klaim wilayah, serta dukungan penuh Bedrock & Java Edition.
+        </p>
+
+        <!-- Server IP Quick Copy Cards -->
+        <div class="grid sm:grid-cols-2 gap-3 pt-2">
+          
+          <!-- Bedrock Edition Card -->
+          <div class="p-4 rounded-xl border border-surface-200 bg-white shadow-sm flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-surface-500 uppercase tracking-wider">Bedrock Edition</span>
+              <span class="text-[11px] font-mono font-medium px-2 py-0.5 bg-surface-100 text-surface-700 rounded">Port: 19133</span>
+            </div>
+            <div class="font-mono text-sm font-semibold text-surface-900 bg-surface-50 p-2.5 rounded-lg border border-surface-200/60 break-all">
+              play.kyuryu.my.id
+            </div>
+            <button onclick="copyToClipboard('play.kyuryu.my.id', 'IP Bedrock berhasil disalin!')" class="w-full py-2 px-3 bg-surface-950 hover:bg-surface-800 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-2">
+              <i class="fa-regular fa-copy"></i> Salin IP Bedrock
+            </button>
+          </div>
+
+          <!-- Java Edition Card -->
+          <div class="p-4 rounded-xl border border-surface-200 bg-white shadow-sm flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-surface-500 uppercase tracking-wider">Java Edition</span>
+              <span class="text-[11px] font-mono font-medium px-2 py-0.5 bg-surface-100 text-surface-700 rounded">Default Port</span>
+            </div>
+            <div class="font-mono text-sm font-semibold text-surface-900 bg-surface-50 p-2.5 rounded-lg border border-surface-200/60 break-all">
+              play.kyuryu.my.id
+            </div>
+            <button onclick="copyToClipboard('play.kyuryu.my.id', 'IP Java berhasil disalin!')" class="w-full py-2 px-3 bg-brand-600 hover:bg-brand-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-2">
+              <i class="fa-regular fa-copy"></i> Salin IP Java
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Metric Badges -->
+        <div class="pt-4 grid grid-cols-3 gap-4 border-t border-surface-200 max-w-lg text-left">
+          <div>
+            <div id="live-online-count" class="font-display font-bold text-2xl text-surface-950">-</div>
+            <div class="text-xs text-surface-500 font-medium">Pemain Online</div>
+          </div>
+          <div>
+            <div class="font-display font-bold text-2xl text-surface-950">24/7</div>
+            <div class="text-xs text-surface-500 font-medium">Server Uptime</div>
+          </div>
+          <div>
+            <div class="font-display font-bold text-2xl text-surface-950">Geyser</div>
+            <div class="text-xs text-surface-500 font-medium">Bedrock + Java</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FEATURE GRID SECTION -->
+    <section id="features" class="py-16 bg-white border-y border-surface-200">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-10">
+        
+        <div class="max-w-xl space-y-2">
+          <h2 class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-surface-950">Fitur Utama Server</h2>
+          <p class="text-surface-600 text-sm">Dirancang dengan presisi untuk memberikan pengalaman survival yang seimbang dan adil bagi seluruh pemain.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <div class="p-6 rounded-xl border border-surface-200 bg-surface-50/50 space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-coins"></i>
+            </div>
+            <h3 class="font-semibold text-lg text-surface-950">Sistem Ekonomi Balanced</h3>
+            <p class="text-surface-600 text-sm leading-relaxed">Pasar in-game yang dikelola secara cermat. Berdagang antar pemain atau manfaatkan shop resmi tanpa inflasi tak terkontrol.</p>
+          </div>
+
+          <div class="p-6 rounded-xl border border-surface-200 bg-surface-50/50 space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h3 class="font-semibold text-lg text-surface-950">Land Claim & Anti-Grief</h3>
+            <p class="text-surface-600 text-sm leading-relaxed">Fitur proteksi wilayah otomatis. Amankan bangunan, chest, dan hasil panen milikmu dari jangkauan pemain lain.</p>
+          </div>
+
+          <div class="p-6 rounded-xl border border-surface-200 bg-surface-50/50 space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-box-open"></i>
+            </div>
+            <h3 class="font-semibold text-lg text-surface-950">Crate System & Starter Kits</h3>
+            <p class="text-surface-600 text-sm leading-relaxed">Nikmati reward harian, kit perlengkapan awal gratis, serta kesempatan mendapatkan item langka via Crate Key.</p>
+          </div>
+
+          <div class="p-6 rounded-xl border border-surface-200 bg-surface-50/50 space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-ranking-star"></i>
+            </div>
+            <h3 class="font-semibold text-lg text-surface-950">Progresi Rank Privilese</h3>
+            <p class="text-surface-600 text-sm leading-relaxed">Tingkatkan status akun untuk membuka perintah utilitas eksklusif seperti /fly, /heal, serta tambahan kuota proteksi lahan.</p>
+          </div>
+
+          <div class="p-6 rounded-xl border border-surface-200 bg-surface-50/50 space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-map-location-dot"></i>
+            </div>
+            <h3 class="font-semibold text-lg text-surface-950">Web Live Map Integration</h3>
+            <p class="text-surface-600 text-sm leading-relaxed">Pantau peta dunia KyuryuSMP secara konsisten dan real-time langsung melalui browser web kapan saja.</p>
+          </div>
+
+          <div class="p-6 rounded-xl border border-surface-200 bg-surface-50/50 space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-stone-200 text-stone-800 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-server"></i>
+            </div>
+            <h3 class="font-semibold text-lg text-surface-950">Akses Panel Publik</h3>
+            <p class="text-surface-600 text-sm leading-relaxed">Kemudahan akses dasbor server publik bagi anggota komunitas terdaftar untuk pemantauan layanan.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CREATOR REWARDS SECTION -->
+    <section id="creator-rewards" class="py-16 px-4 sm:px-6 max-w-6xl mx-auto space-y-10">
+      <div class="max-w-xl space-y-2">
+        <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Kreator & Promosi</span>
+        <h2 class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-surface-950">Program Reward Content Creator</h2>
+        <p class="text-surface-600 text-sm">Dukung pertumbuhan server melalui konten video atau live stream dan dapatkan reward eksklusif in-game.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        
+        <!-- Live Streamer Box -->
+        <div class="p-6 sm:p-8 rounded-xl border border-surface-200 bg-white space-y-6">
+          <div class="flex items-center justify-between">
+            <div class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center text-lg font-bold">
+              <i class="fa-solid fa-video"></i>
+            </div>
+            <span class="text-xs font-semibold bg-red-50 text-red-700 px-2.5 py-1 rounded-full border border-red-200">Live Streaming</span>
+          </div>
+
+          <div class="space-y-1">
+            <h3 class="font-bold text-xl text-surface-950">Reward Live Streamer</h3>
+            <p class="text-xs text-surface-500">Khusus penyiaran di platform YouTube & TikTok</p>
+          </div>
+
+          <div class="space-y-3 border-t border-surface-100 pt-4 text-sm">
+            <div class="flex justify-between items-center text-surface-600">
+              <span>Minimal Durasi Penyiaran:</span>
+              <span class="font-semibold text-surface-900">20 Menit</span>
+            </div>
+            <div class="flex justify-between items-center text-surface-600">
+              <span>Gelar/Rank In-Game:</span>
+              <span class="font-semibold text-emerald-600">Rank Streamer Special</span>
+            </div>
+            <div class="flex justify-between items-center text-surface-600">
+              <span>Bonus Uang Tunai (IGM):</span>
+              <span class="font-semibold text-emerald-600">+ 500.000 IGM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Creator Box -->
+        <div class="p-6 sm:p-8 rounded-xl border border-surface-200 bg-white space-y-6">
+          <div class="flex items-center justify-between">
+            <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-lg font-bold">
+              <i class="fa-solid fa-thumbs-up"></i>
+            </div>
+            <span class="text-xs font-semibold bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full border border-purple-200">Video Milestone</span>
+          </div>
+
+          <div class="space-y-1">
+            <h3 class="font-bold text-xl text-surface-950">Reward Milestone Video</h3>
+            <p class="text-xs text-surface-500">Pencapaian jumlah Likes pada konten YouTube / Shorts / TikTok</p>
+          </div>
+
+          <div class="space-y-2 border-t border-surface-100 pt-4 text-xs font-medium">
+            <div class="flex justify-between items-center p-2 rounded bg-surface-50">
+              <span class="text-surface-600">100 Likes</span>
+              <span class="font-bold text-surface-900">Rank Ascend</span>
+            </div>
+            <div class="flex justify-between items-center p-2 rounded bg-surface-50">
+              <span class="text-surface-600">200 Likes</span>
+              <span class="font-bold text-surface-900">Rank Master</span>
+            </div>
+            <div class="flex justify-between items-center p-2 rounded bg-surface-50">
+              <span class="text-surface-600">400 Likes</span>
+              <span class="font-bold text-surface-900">Rank Ancestor</span>
+            </div>
+            <div class="flex justify-between items-center p-2 rounded bg-surface-50">
+              <span class="text-surface-600">800 Likes</span>
+              <span class="font-bold text-surface-900">Rank Venerable</span>
+            </div>
+            <div class="flex justify-between items-center p-2 rounded bg-brand-50 border border-brand-200">
+              <span class="text-brand-900 font-bold">16.000 Likes</span>
+              <span class="font-bold text-brand-700">Rank Influence + 250k IGM</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RULES SECTION -->
+    <section id="rules" class="py-16 bg-white border-y border-surface-200">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-10">
+        <div class="max-w-xl space-y-2">
+          <h2 class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-surface-950">Aturan & Pedoman Komunitas</h2>
+          <p class="text-surface-600 text-sm">Seluruh pemain wajib mematuhi regulasi di bawah ini demi menjamin lingkungan bermain yang sehat dan kondusif.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+          
+          <!-- In Game Rules -->
+          <div class="space-y-4">
+            <h3 class="font-semibold text-lg text-surface-950 flex items-center gap-2">
+              <i class="fa-solid fa-gamepad text-brand-600"></i> Peraturan In-Game
+            </h3>
+            <ul class="space-y-3 text-sm text-surface-600">
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-xmark text-red-500 mt-1"></i>
+                <span><strong class="text-surface-900">Dilarang Cheat & Modifikasi Ilegal:</strong> Penggunaan client hack (X-Ray, Fly, KillAura, dll) berakibat pemblokiran permanen.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-xmark text-red-500 mt-1"></i>
+                <span><strong class="text-surface-900">Dilarang Griefing:</strong> Merusak properti milik pemain lain atau mengambil aset di wilayah luar izin dilarang keras.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-xmark text-red-500 mt-1"></i>
+                <span><strong class="text-surface-900">Dilarang Exploiting Bug:</strong> Penemuan celah bug wajib dilaporkan kepada pihak staff dan tidak dimanfaatkan.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-xmark text-red-500 mt-1"></i>
+                <span><strong class="text-surface-900">Etika Obrolan:</strong> Hindari ujaran kebencian, perundungan, pornografi, dan isu SARA di obrolan publik.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Community Rules -->
+          <div class="space-y-4">
+            <h3 class="font-semibold text-lg text-surface-950 flex items-center gap-2">
+              <i class="fa-solid fa-comments text-emerald-600"></i> Peraturan Grup Chat
+            </h3>
+            <ul class="space-y-3 text-sm text-surface-600">
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-xmark text-red-500 mt-1"></i>
+                <span><strong class="text-surface-900">Dilarang Spam:</strong> Hindari mengirimkan pesan berulang, stiker berlebihan, serta file berbahaya.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-xmark text-red-500 mt-1"></i>
+                <span><strong class="text-surface-900">Dilarang Iklan Eksternal:</strong> Tidak diperkenankan mempromosikan server Minecraft lain di dalam platform grup resmi.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-xmark text-red-500 mt-1"></i>
+                <span><strong class="text-surface-900">Relevansi Topik:</strong> Kirimkan pertanyaan atau laporan sesuai pada alur channel diskusi yang disediakan.</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- RESOURCE PACK SECTION -->
+    <section id="resource-pack" class="py-16 px-4 sm:px-6 max-w-6xl mx-auto">
+      <div class="p-8 sm:p-10 rounded-2xl bg-surface-950 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+        <div class="space-y-2 max-w-xl">
+          <span class="text-xs font-mono text-brand-500 uppercase">Official Textures</span>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold">Download Resource Pack Server</h2>
+          <p class="text-surface-400 text-sm leading-relaxed">
+            Dapatkan pengalaman visual terbaik dengan tekstur khusus item, GUI kustom, dan efek atmosferik KyuryuSMP.
+          </p>
+        </div>
+
+        <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+          <a href="https://dropbox.com" target="_blank" rel="noopener noreferrer" class="py-3 px-5 bg-white text-surface-950 hover:bg-surface-100 font-semibold text-xs rounded-xl transition-colors inline-flex items-center justify-center gap-2">
+            <i class="fa-brands fa-dropbox text-base text-blue-600"></i> Download Java Pack
+          </a>
+          <button disabled class="py-3 px-5 bg-surface-800 text-surface-400 font-semibold text-xs rounded-xl cursor-not-allowed inline-flex items-center justify-center gap-2">
+            <i class="fa-solid fa-hourglass-half text-xs"></i> Bedrock Pack (WIP)
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== PAGE 2: RANKS ==================== -->
+  <main id="page-ranks" class="page-container hidden max-w-6xl mx-auto py-12 px-4 sm:px-6 page-fade w-full">
+    
+    <div class="mb-8 flex items-center justify-between">
+      <button onclick="switchPage('home')" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-surface-700 bg-surface-100 hover:bg-surface-200 rounded-lg transition-colors">
+        <i class="fa-solid fa-arrow-left"></i> Beranda
+      </button>
+      <span class="text-xs font-medium text-surface-500">Daftar Paket Rank Server</span>
+    </div>
+
+    <div class="max-w-xl space-y-2 mb-10">
+      <h2 class="font-display text-3xl font-bold tracking-tight text-surface-950">Pilihan Rank Privilese</h2>
+      <p class="text-surface-600 text-sm">Setiap kenaikan tingkat rank memberikan semua akses dan manfaat fitur dari tier di bawahnya.</p>
+    </div>
+
+    <!-- Rank List Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Novice -->
+      <div class="p-6 rounded-xl border border-surface-200 bg-white flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <div class="flex justify-between items-start border-b border-surface-100 pb-4">
+            <div>
+              <span class="text-xs font-semibold text-surface-400 uppercase tracking-wider block">Default Tier</span>
+              <h3 class="font-bold text-xl text-surface-950">Novice</h3>
+            </div>
+            <span class="px-2.5 py-1 bg-surface-100 text-surface-700 text-xs font-bold rounded">Gratis</span>
+          </div>
+          <div class="space-y-2 text-xs text-surface-600 font-medium">
+            <p class="text-surface-900 font-semibold">Bonus Rank Novice:</p>
+            <ul class="space-y-1.5">
+              <li>• Claim Block: <strong>5.000 Block</strong></li>
+              <li>• Claim Land: <strong>2× Wilayah</strong></li>
+              <li>• Saldo Awal: <strong>50.000 IGM</strong></li>
+              <li>• Kit Default Survival</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ascend -->
+      <div class="p-6 rounded-xl border border-surface-200 bg-white flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <div class="flex justify-between items-start border-b border-surface-100 pb-4">
+            <div>
+              <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider block">Tier 1</span>
+              <h3 class="font-bold text-xl text-surface-950">Ascend</h3>
+            </div>
+            <span class="px-2.5 py-1 bg-brand-50 text-brand-700 text-xs font-bold rounded border border-brand-200">Rp 10.000</span>
+          </div>
+          <div class="space-y-2 text-xs text-surface-600 font-medium">
+            <p class="text-surface-900 font-semibold">Akses Command & Bonus:</p>
+            <p class="font-mono text-brand-700 font-semibold">/feed, /heal</p>
+            <ul class="space-y-1 pt-1">
+              <li>• Claim Block: <strong>15.000 Block</strong></li>
+              <li>• Claim Land: <strong>3× Wilayah</strong></li>
+              <li>• Saldo IGM: <strong>68.000 IGM</strong></li>
+              <li>• Kit Ascend Special</li>
+            </ul>
+          </div>
+        </div>
+        <a href="https://wa.me/818041243251?text=Halo%20Owner%20SinChan,%20saya%20mau%20beli%20Rank%20Ascend%20seharga%20Rp%2010.000%20di%20KyuryuSMP." target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-surface-950 hover:bg-surface-800 text-white font-medium text-xs rounded-lg transition-colors text-center block">
+          Beli Rank Ascend
+        </a>
+      </div>
+
+      <!-- Master -->
+      <div class="p-6 rounded-xl border border-surface-200 bg-white flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <div class="flex justify-between items-start border-b border-surface-100 pb-4">
+            <div>
+              <span class="text-xs font-semibold text-sky-600 uppercase tracking-wider block">Tier 2</span>
+              <h3 class="font-bold text-xl text-surface-950">Master</h3>
+            </div>
+            <span class="px-2.5 py-1 bg-sky-50 text-sky-700 text-xs font-bold rounded border border-sky-200">Rp 24.000</span>
+          </div>
+          <div class="space-y-2 text-xs text-surface-600 font-medium">
+            <p class="text-surface-900 font-semibold">Akses Command & Bonus:</p>
+            <p class="font-mono text-sky-700 font-semibold">/fly, /repair, /workbench</p>
+            <ul class="space-y-1 pt-1">
+              <li>• Claim Block: <strong>28.000 Block</strong></li>
+              <li>• Claim Land: <strong>5× Wilayah</strong></li>
+              <li>• Saldo IGM: <strong>84.000 IGM</strong></li>
+              <li>• Kit Master Special</li>
+            </ul>
+          </div>
+        </div>
+        <a href="https://wa.me/818041243251?text=Halo%20Owner%20SinChan,%20saya%20mau%20beli%20Rank%20Master%20seharga%20Rp%2024.000%20di%20KyuryuSMP." target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-surface-950 hover:bg-surface-800 text-white font-medium text-xs rounded-lg transition-colors text-center block">
+          Beli Rank Master
+        </a>
+      </div>
+
+      <!-- Ancestor -->
+      <div class="p-6 rounded-xl border border-surface-200 bg-white flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <div class="flex justify-between items-start border-b border-surface-100 pb-4">
+            <div>
+              <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider block">Tier 3</span>
+              <h3 class="font-bold text-xl text-surface-950">Ancestor</h3>
+            </div>
+            <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded border border-purple-200">Rp 32.000</span>
+          </div>
+          <div class="space-y-2 text-xs text-surface-600 font-medium">
+            <p class="text-surface-900 font-semibold">Akses Command & Bonus:</p>
+            <p class="font-mono text-purple-700 font-semibold">/repair all, /speed, /nick</p>
+            <ul class="space-y-1 pt-1">
+              <li>• Claim Block: <strong>40.000 Block</strong></li>
+              <li>• Claim Land: <strong>7× Wilayah</strong></li>
+              <li>• Saldo IGM: <strong>95.000 IGM</strong></li>
+              <li>• Kit Ancestor Special</li>
+            </ul>
+          </div>
+        </div>
+        <a href="https://wa.me/818041243251?text=Halo%20Owner%20SinChan,%20saya%20mau%20beli%20Rank%20Ancestor%20seharga%20Rp%2032.000%20di%20KyuryuSMP." target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-surface-950 hover:bg-surface-800 text-white font-medium text-xs rounded-lg transition-colors text-center block">
+          Beli Rank Ancestor
+        </a>
+      </div>
+
+      <!-- Venerabel -->
+      <div class="p-6 rounded-xl border border-surface-200 bg-white flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <div class="flex justify-between items-start border-b border-surface-100 pb-4">
+            <div>
+              <span class="text-xs font-semibold text-rose-600 uppercase tracking-wider block">Tier 4</span>
+              <h3 class="font-bold text-xl text-surface-950">Venerabel</h3>
+            </div>
+            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-xs font-bold rounded border border-rose-200">Rp 56.000</span>
+          </div>
+          <div class="space-y-2 text-xs text-surface-600 font-medium">
+            <p class="text-surface-900 font-semibold">Akses Command & Bonus:</p>
+            <p class="font-mono text-rose-700 font-semibold">/enderchest (/ec), /hat, /lightning</p>
+            <ul class="space-y-1 pt-1">
+              <li>• Claim Block: <strong>52.000 Block</strong></li>
+              <li>• Claim Land: <strong>8× Wilayah</strong></li>
+              <li>• Saldo IGM: <strong>114.000 IGM</strong></li>
+              <li>• Kit Venerabel Special</li>
+            </ul>
+          </div>
+        </div>
+        <a href="https://wa.me/818041243251?text=Halo%20Owner%20SinChan,%20saya%20mau%20beli%20Rank%20Venerabel%20seharga%20Rp%2056.000%20di%20KyuryuSMP." target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-surface-950 hover:bg-surface-800 text-white font-medium text-xs rounded-lg transition-colors text-center block">
+          Beli Rank Venerabel
+        </a>
+      </div>
+
+      <!-- Kyuryu (Ultimate) -->
+      <div class="p-6 rounded-xl border-2 border-brand-500 bg-brand-50/30 flex flex-col justify-between space-y-6 relative overflow-hidden">
+        <div class="space-y-4">
+          <div class="flex justify-between items-start border-b border-brand-200 pb-4">
+            <div>
+              <span class="text-xs font-bold text-brand-700 uppercase tracking-wider block">Top Supreme Rank</span>
+              <h3 class="font-bold text-2xl text-surface-950">Kyuryu</h3>
+            </div>
+            <span class="px-3 py-1 bg-brand-500 text-white text-xs font-bold rounded shadow-sm">Rp 110.000</span>
+          </div>
+          <div class="space-y-2 text-xs text-surface-700 font-medium">
+            <p class="text-surface-950 font-bold">Akses Command Sultan Supreme:</p>
+            <p class="font-mono text-brand-800 font-bold">/god, /vanish, /fireball, /kittycannon, /tp</p>
+            <ul class="space-y-1 pt-1 text-surface-800">
+              <li>• Claim Block: <strong>74.000 Block</strong></li>
+              <li>• Claim Land: <strong>10× Wilayah</strong></li>
+              <li>• Saldo IGM: <strong>150.000 IGM</strong></li>
+              <li>• Supreme Kit Kyuryu Tier</li>
+            </ul>
+          </div>
+        </div>
+        <a href="https://wa.me/818041243251?text=Halo%20Owner%20SinChan,%20saya%20mau%20beli%20Rank%20Kyuryu%20Supreme%20seharga%20Rp%20110.000%20di%20KyuryuSMP." target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg transition-colors text-center block">
+          👑 Beli Rank Kyuryu Supreme
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ==================== PAGE 3: STAFF ==================== -->
+  <main id="page-staff" class="page-container hidden max-w-5xl mx-auto py-12 px-4 sm:px-6 page-fade w-full">
+    
+    <div class="mb-8 flex items-center justify-between">
+      <button onclick="switchPage('home')" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-surface-700 bg-surface-100 hover:bg-surface-200 rounded-lg transition-colors">
+        <i class="fa-solid fa-arrow-left"></i> Beranda
+      </button>
+      <span class="text-xs font-medium text-surface-500">Tim Manajemen Server</span>
+    </div>
+
+    <div class="max-w-xl space-y-2 mb-8">
+      <h2 class="font-display text-3xl font-bold tracking-tight text-surface-950">Tim Staff & Pengelola</h2>
+      <p class="text-surface-600 text-sm">Hubungi tim manajemen resmi untuk bantuan teknis, kendala transaksi, atau laporan pelanggaran.</p>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="flex flex-wrap gap-2 mb-8 text-xs font-semibold">
+      <button onclick="filterStaffPage('all')" id="staff-tab-all" class="staff-filter-btn px-3 py-1.5 rounded-lg bg-surface-950 text-white transition-colors">Semua Tim</button>
+      <button onclick="filterStaffPage('owner')" id="staff-tab-owner" class="staff-filter-btn px-3 py-1.5 rounded-lg bg-surface-100 text-surface-700 hover:bg-surface-200 transition-colors">Owner</button>
+      <button onclick="filterStaffPage('co-owner')" id="staff-tab-co-owner" class="staff-filter-btn px-3 py-1.5 rounded-lg bg-surface-100 text-surface-700 hover:bg-surface-200 transition-colors">Co-Owner</button>
+      <button onclick="filterStaffPage('dev-admin')" id="staff-tab-dev-admin" class="staff-filter-btn px-3 py-1.5 rounded-lg bg-surface-100 text-surface-700 hover:bg-surface-200 transition-colors">Dev / Admin</button>
+    </div>
+
+    <!-- Staff Cards Grid (Loaded dynamically from Supabase) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="staff-grid-cards"></div>
+  </main>
+
+  <!-- ==================== PAGE 4: EVENTS (#events) ==================== -->
+  <main id="page-events" class="page-container hidden max-w-5xl mx-auto py-12 px-4 sm:px-6 page-fade w-full">
+    <div class="mb-8 flex items-center justify-between">
+      <a href="#" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-surface-700 bg-surface-100 hover:bg-surface-200 rounded-lg transition-colors">
+        <i class="fa-solid fa-arrow-left"></i> Beranda
+      </a>
+      <span id="event-count-text" class="text-xs font-mono font-medium text-emerald-600">Memuat event...</span>
+    </div>
+
+    <div class="max-w-xl space-y-2 mb-8">
+      <h2 class="font-display text-3xl font-bold tracking-tight text-surface-950">Jadwal & Event Server</h2>
+      <p class="text-surface-600 text-sm">Ikuti event kompetisi berhadiah menarik yang rutin diselenggarakan oleh pihak server.</p>
+    </div>
+
+    <!-- Skeleton Loading -->
+    <div id="events-loading-skeleton" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="p-6 rounded-xl border border-surface-200 bg-white space-y-4">
+        <div class="w-full h-44 rounded-lg skeleton"></div>
+        <div class="w-1/3 h-5 rounded skeleton"></div>
+        <div class="w-2/3 h-6 rounded skeleton"></div>
+      </div>
+      <div class="p-6 rounded-xl border border-surface-200 bg-white space-y-4">
+        <div class="w-full h-44 rounded-lg skeleton"></div>
+        <div class="w-1/3 h-5 rounded skeleton"></div>
+        <div class="w-2/3 h-6 rounded skeleton"></div>
+      </div>
+    </div>
+
+    <!-- Event Container -->
+    <div id="events-grid-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden"></div>
+  </main>
+
+  <!-- ==================== PAGE 5: INFO (#info) ==================== -->
+  <main id="page-info" class="page-container hidden max-w-4xl mx-auto py-12 px-4 sm:px-6 page-fade w-full">
+    <div class="mb-8 flex items-center justify-between">
+      <a href="#" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-surface-700 bg-surface-100 hover:bg-surface-200 rounded-lg transition-colors">
+        <i class="fa-solid fa-arrow-left"></i> Beranda
+      </a>
+      <span class="text-xs font-medium text-surface-500">Pengumuman & Update</span>
+    </div>
+
+    <div class="max-w-xl space-y-2 mb-8">
+      <h2 class="font-display text-3xl font-bold tracking-tight text-surface-950">Informasi & Update Terbaru</h2>
+      <p class="text-surface-600 text-sm">Berita resmi dan patch note perkembangan server KyuryuSMP.</p>
+    </div>
+
+    <!-- Skeleton Loading -->
+    <div id="info-loading-skeleton" class="space-y-4">
+      <div class="p-6 rounded-xl border border-surface-200 bg-white space-y-3">
+        <div class="w-1/4 h-4 rounded skeleton"></div>
+        <div class="w-3/4 h-6 rounded skeleton"></div>
+        <div class="w-full h-20 rounded skeleton"></div>
+      </div>
+    </div>
+
+    <!-- Info Container -->
+    <div id="info-list-container" class="space-y-6 hidden"></div>
+  </main>
+
+  <!-- ==================== PAGE 6: FAQ (#faq) ==================== -->
+  <main id="page-faq" class="page-container hidden max-w-4xl mx-auto py-12 px-4 sm:px-6 page-fade w-full">
+    <div class="mb-8 flex items-center justify-between">
+      <a href="#" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-surface-700 bg-surface-100 hover:bg-surface-200 rounded-lg transition-colors">
+        <i class="fa-solid fa-arrow-left"></i> Beranda
+      </a>
+      <span class="text-xs font-medium text-surface-500">Pusat Bantuan Komunitas</span>
+    </div>
+
+    <div class="max-w-xl space-y-2 mb-10">
+      <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Frequently Asked Questions</span>
+      <h2 class="font-display text-3xl font-bold tracking-tight text-surface-950">Pertanyaan yang Sering Diajukan</h2>
+      <p class="text-surface-600 text-sm">Temukan jawaban cepat seputar server IP, dukungan platform, sistem klaim lahan, hingga rank.</p>
+    </div>
+
+    <!-- Accordion FAQ List -->
+    <div id="faq-list-container" class="space-y-3">
+      
+      <!-- Item 1 -->
+      <details id="faq-static-1" class="group p-5 rounded-xl border border-surface-200 bg-white [&_summary::-webkit-details-marker]:hidden transition-all">
+        <summary class="flex items-center justify-between cursor-pointer font-semibold text-base text-surface-950">
+          <span>Bagaimana cara bergabung ke KyuryuSMP?</span>
+          <span class="transition-transform duration-200 group-open:-rotate-180 text-surface-400">
+            <i class="fa-solid fa-chevron-down text-sm"></i>
+          </span>
+        </summary>
+        <div class="mt-4 pt-4 border-t border-surface-100 text-sm text-surface-600 leading-relaxed space-y-2">
+          <p>Anda dapat bergabung menggunakan Minecraft Java Edition maupun Bedrock Edition (Android/iOS/Windows) dengan detail Server IP berikut:</p>
+          <ul class="list-disc pl-5 space-y-1 font-mono text-xs text-surface-800">
+            <li><strong>IP Server:</strong> play.kyuryu.my.id</li>
+            <li><strong>Port Bedrock:</strong> 19133</li>
+            <li><strong>Port Java:</strong> Default (25565)</li>
+          </ul>
+        </div>
+      </details>
+
+      <!-- Item 2 -->
+      <details id="faq-static-2" class="group p-5 rounded-xl border border-surface-200 bg-white [&_summary::-webkit-details-marker]:hidden transition-all">
+        <summary class="flex items-center justify-between cursor-pointer font-semibold text-base text-surface-950">
+          <span>Apakah server ini mendukung pemain Bedrock/PE?</span>
+          <span class="transition-transform duration-200 group-open:-rotate-180 text-surface-400">
+            <i class="fa-solid fa-chevron-down text-sm"></i>
+          </span>
+        </summary>
+        <div class="mt-4 pt-4 border-t border-surface-100 text-sm text-surface-600 leading-relaxed">
+          Ya, KyuryuSMP mengintegrasikan plugin Geyser & Floodgate, memungkinkan pemain Minecraft Bedrock (HP/Tablet/PC) untuk bermain bersama di dalam satu dunia dengan pemain Java Edition secara seamless.
+        </div>
+      </details>
+
+      <!-- Item 3 -->
+      <details id="faq-static-3" class="group p-5 rounded-xl border border-surface-200 bg-white [&_summary::-webkit-details-marker]:hidden transition-all">
+        <summary class="flex items-center justify-between cursor-pointer font-semibold text-base text-surface-950">
+          <span>Bagaimana cara mengamankan wilayah/bangunan saya?</span>
+          <span class="transition-transform duration-200 group-open:-rotate-180 text-surface-400">
+            <i class="fa-solid fa-chevron-down text-sm"></i>
+          </span>
+        </summary>
+        <div class="mt-4 pt-4 border-t border-surface-100 text-sm text-surface-600 leading-relaxed">
+          Gunakan sistem <strong>Land Claim</strong> bawaan server. Setiap pemain baru (Rank Novice) mendapatkan kuota awal 5.000 Block & 2 wilayah klaim gratis untuk memproteksi bangunan dan chest milik mereka dari pemain lain.
+        </div>
+      </details>
+
+      <!-- Item 4 -->
+      <details id="faq-static-4" class="group p-5 rounded-xl border border-surface-200 bg-white [&_summary::-webkit-details-marker]:hidden transition-all">
+        <summary class="flex items-center justify-between cursor-pointer font-semibold text-base text-surface-950">
+          <span>Bagaimana prosedur pembelian Rank Privilese?</span>
+          <span class="transition-transform duration-200 group-open:-rotate-180 text-surface-400">
+            <i class="fa-solid fa-chevron-down text-sm"></i>
+          </span>
+        </summary>
+        <div class="mt-4 pt-4 border-t border-surface-100 text-sm text-surface-600 leading-relaxed">
+          Seluruh pembelian Rank Privilese ditangani langsung oleh Owner resmi (<strong>SinChan</strong>) via WhatsApp demi keamanan transaksi. Silakan buka halaman <button onclick="switchPage('ranks')" class="text-brand-700 font-semibold underline">List Rank</button> lalu klik tombol WhatsApp pada paket yang Anda inginkan.
+        </div>
+      </details>
+
+      <!-- Item 5 -->
+      <details id="faq-static-5" class="group p-5 rounded-xl border border-surface-200 bg-white [&_summary::-webkit-details-marker]:hidden transition-all">
+        <summary class="flex items-center justify-between cursor-pointer font-semibold text-base text-surface-950">
+          <span>Siapa yang harus dihubungi jika mengalami bug/kendala?</span>
+          <span class="transition-transform duration-200 group-open:-rotate-180 text-surface-400">
+            <i class="fa-solid fa-chevron-down text-sm"></i>
+          </span>
+        </summary>
+        <div class="mt-4 pt-4 border-t border-surface-100 text-sm text-surface-600 leading-relaxed">
+          Anda dapat menghubungi Tim Staff & Pengelola KyuryuSMP melalui halaman <button onclick="switchPage('staff')" class="text-surface-950 font-semibold underline">Tim Staff</button> atau mengirim laporan pada grup obrolan resmi.
+        </div>
+      </details>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-surface-200 py-10 px-4 sm:px-6 mt-16 text-xs text-surface-500">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div>
+        <span class="font-display font-bold text-surface-950 text-sm">Kyuryu<span class="text-brand-600">SMP</span></span>
+        <p class="mt-1">Minecraft Survival Server Indonesia • Cross-Platform Play</p>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-4 font-medium text-surface-600">
+        <a href="#" class="hover:text-surface-950 transition-colors">Home</a>
+        <a href="#events" class="hover:text-surface-950 transition-colors">Event</a>
+        <a href="#info" class="hover:text-surface-950 transition-colors">Info</a>
+        <a href="#faq" class="hover:text-surface-950 transition-colors">FAQ</a>
+        <a href="http://basic-4.mineidhost.com:19318" target="_blank" rel="noopener noreferrer" class="hover:text-surface-950 transition-colors">Live Map</a>
+        <button onclick="switchPage('ranks')" class="hover:text-surface-950 transition-colors">Rank</button>
+        <button onclick="switchPage('staff')" class="hover:text-surface-950 transition-colors">Staff</button>
+      </div>
+
+      <div>
+        &copy; 2026 KyuryuSMP. Not affiliated with Mojang AB or Microsoft.
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    /* ==========================================
+       1. SUPABASE CLIENT CONFIGURATION
+       ========================================== */
+    const SUPABASE_URL = "https://dmltyjxrvzqbavlyrzbi.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_Hl7HODK_icRPbsev29r4Hw_XTit1e_b";
+
+    let _supabase = null;
+    if (typeof supabase !== 'undefined' && SUPABASE_URL !== "MASUKKAN_SUPABASE_URL") {
+      _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    /* Carousel State */
+    let currentSlideIndex = 0;
+    let carouselSlidesCount = 0;
+    let carouselInterval = null;
+
+    /* ==========================================
+       2. ROUTING & PAGE NAVIGATION LOGIC
+       ========================================== */
+    function handleHashRouting() {
+      const hash = window.location.hash;
+      const allPages = ['page-home', 'page-ranks', 'page-staff', 'page-events', 'page-info', 'page-faq'];
+
+      allPages.forEach(p => {
+        const el = document.getElementById(p);
+        if (el) el.classList.add('hidden');
+      });
+
+      let targetId = null;
+      if (hash.startsWith('#event=')) {
+        targetId = hash.replace('#event=', '');
+        document.getElementById('page-events').classList.remove('hidden');
+        loadEventsData(targetId);
+        markAsRead('events');
+      } else if (hash === '#events') {
+        document.getElementById('page-events').classList.remove('hidden');
+        loadEventsData();
+        markAsRead('events');
+      } else if (hash.startsWith('#info=')) {
+        targetId = hash.replace('#info=', '');
+        document.getElementById('page-info').classList.remove('hidden');
+        loadNewsData(targetId);
+        markAsRead('info');
+      } else if (hash === '#info') {
+        document.getElementById('page-info').classList.remove('hidden');
+        loadNewsData();
+        markAsRead('info');
+      } else if (hash.startsWith('#faq=')) {
+        targetId = hash.replace('#faq=', '');
+        document.getElementById('page-faq').classList.remove('hidden');
+        loadFAQData(targetId);
+        markAsRead('faq');
+      } else if (hash === '#faq') {
+        document.getElementById('page-faq').classList.remove('hidden');
+        loadFAQData();
+        markAsRead('faq');
+      } else {
+        const currentActive = window._currentSubPage || 'home';
+        document.getElementById(`page-${currentActive}`).classList.remove('hidden');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchPage(pageId) {
+      window._currentSubPage = pageId;
+      if (window.location.hash) {
+        history.pushState("", document.title, window.location.pathname + window.location.search);
+      }
+      handleHashRouting();
+    }
+
+    function navigateToSection(sectionId) {
+      switchPage('home');
+      setTimeout(() => {
+        const target = document.getElementById(sectionId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 50);
+    }
+
+    window.addEventListener('hashchange', handleHashRouting);
+
+    /* ==========================================
+       3. DATA FETCHING (SUPABASE INTEGRATION)
+       ========================================== */
+    async function loadEventsData(focusId = null) {
+      const skeleton = document.getElementById('events-loading-skeleton');
+      const container = document.getElementById('events-grid-container');
+      const countBadgeText = document.getElementById('event-count-text');
+
+      skeleton.classList.remove('hidden');
+      container.classList.add('hidden');
+
+      if (!_supabase) {
+        skeleton.classList.add('hidden');
+        container.classList.remove('hidden');
+        container.innerHTML = `
+          <div class="col-span-full p-6 rounded-xl border border-surface-200 bg-white text-center space-y-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500 text-2xl"></i>
+            <h3 class="font-bold text-surface-950">Konfigurasi Supabase Belum Lengkap</h3>
+          </div>
+        `;
+        countBadgeText.innerText = "0 Event Aktif";
+        return;
+      }
+
+      try {
+        const { data: events, error } = await _supabase
+          .from('events')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        skeleton.classList.add('hidden');
+        container.classList.remove('hidden');
+        countBadgeText.innerText = `🟢 ${events.length} Event Berlangsung`;
+
+        if (events.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full p-8 rounded-xl border border-surface-200 bg-white text-center text-surface-500 text-xs">
+              Belum ada event aktif saat ini.
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = events.map(ev => `
+          <div id="item-event-${ev.id}" class="p-6 rounded-xl border border-surface-200 bg-white flex flex-col justify-between space-y-4 ${focusId === ev.id ? 'ring-2 ring-brand-500' : ''}">
+            <div class="space-y-3">
+              ${ev.image_url ? `
+                <div class="w-full h-44 rounded-lg overflow-hidden bg-surface-100 border border-surface-200">
+                  <img src="${ev.image_url}" alt="${ev.name}" class="w-full h-full object-cover" />
+                </div>
+              ` : ''}
+              
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded">SEDANG BERLANGSUNG</span>
+                <div class="flex items-center gap-2">
+                  ${ev.prize ? `<span class="font-medium text-surface-600">Prize: ${ev.prize}</span>` : ''}
+                  <button onclick="shareItem('event', '${ev.id}', '${ev.name}')" class="p-1.5 text-surface-500 hover:text-surface-900 transition-colors" title="Bagikan">
+                    <i class="fa-solid fa-share-nodes text-sm"></i>
+                  </button>
+                </div>
+              </div>
+
+              <h3 class="font-bold text-xl text-surface-950">${ev.name}</h3>
+              <p class="text-xs text-surface-600 leading-relaxed">${ev.description || 'Tidak ada deskripsi.'}</p>
+            </div>
+
+            <div class="pt-3 border-t border-surface-100 flex items-center gap-4 text-xs text-surface-500 font-mono">
+              ${ev.date ? `<span><i class="fa-regular fa-calendar mr-1"></i>${ev.date}</span>` : ''}
+              ${ev.time ? `<span><i class="fa-regular fa-clock mr-1"></i>${ev.time}</span>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        if (focusId) {
+          setTimeout(() => {
+            const el = document.getElementById(`item-event-${focusId}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
+
+      } catch (err) {
+        console.error("Error fetching events:", err);
+        skeleton.classList.add('hidden');
+        container.classList.remove('hidden');
+      }
+    }
+
+    async function loadNewsData(focusId = null) {
+      const skeleton = document.getElementById('info-loading-skeleton');
+      const container = document.getElementById('info-list-container');
+
+      skeleton.classList.remove('hidden');
+      container.classList.add('hidden');
+
+      if (!_supabase) {
+        skeleton.classList.add('hidden');
+        container.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const { data: news, error } = await _supabase
+          .from('news')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        skeleton.classList.add('hidden');
+        container.classList.remove('hidden');
+
+        if (news.length === 0) {
+          container.innerHTML = `
+            <div class="p-8 rounded-xl border border-surface-200 bg-white text-center text-surface-500 text-xs">
+              Belum ada berita atau pengumuman.
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = news.map(item => {
+          const dateFormatted = new Date(item.created_at).toLocaleDateString('id-ID', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          });
+
+          return `
+            <div id="item-info-${item.id}" class="p-6 sm:p-8 rounded-xl border border-surface-200 bg-white space-y-4 ${focusId === item.id ? 'ring-2 ring-brand-500' : ''}">
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold text-brand-700 bg-brand-50 px-2 py-0.5 rounded">INFORMASI</span>
+                  <span class="text-surface-400 font-mono">${dateFormatted}</span>
+                </div>
+                <button onclick="shareItem('info', '${item.id}', '${item.title}')" class="p-1.5 text-surface-500 hover:text-surface-900 transition-colors" title="Bagikan">
+                  <i class="fa-solid fa-share-nodes text-sm"></i>
+                </button>
+              </div>
+
+              <h3 class="font-bold text-2xl text-surface-950">${item.title}</h3>
+
+              ${item.image_url ? `
+                <div class="w-full max-h-72 rounded-lg overflow-hidden bg-surface-100 border border-surface-200">
+                  <img src="${item.image_url}" alt="${item.title}" class="w-full h-full object-cover" />
+                </div>
+              ` : ''}
+
+              <p class="text-sm text-surface-600 leading-relaxed whitespace-pre-line">${item.content || item.description || ''}</p>
+            </div>
+          `;
+        }).join('');
+
+        if (focusId) {
+          setTimeout(() => {
+            const el = document.getElementById(`item-info-${focusId}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
+
+      } catch (err) {
+        console.error("Error fetching news:", err);
+        skeleton.classList.add('hidden');
+        container.classList.remove('hidden');
+      }
+    }
+
+    async function loadFAQData(focusId = null) {
+      if (!_supabase) return;
+
+      try {
+        const { data: faqs, error } = await _supabase
+          .from('faqs')
+          .select('*')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+
+        if (error || !faqs || faqs.length === 0) return;
+
+        const container = document.getElementById('faq-list-container');
+        container.innerHTML = faqs.map(faq => `
+          <details id="item-faq-${faq.id}" class="group p-5 rounded-xl border border-surface-200 bg-white [&_summary::-webkit-details-marker]:hidden transition-all ${focusId === faq.id ? 'ring-2 ring-brand-500' : ''}" ${focusId === faq.id ? 'open' : ''}>
+            <summary class="flex items-center justify-between cursor-pointer font-semibold text-base text-surface-950">
+              <span>${faq.question}</span>
+              <div class="flex items-center gap-3">
+                <button onclick="shareItem('faq', '${faq.id}', '${faq.question}')" class="p-1 text-surface-400 hover:text-surface-900 transition-colors" title="Bagikan">
+                  <i class="fa-solid fa-share-nodes text-xs"></i>
+                </button>
+                <span class="transition-transform duration-200 group-open:-rotate-180 text-surface-400">
+                  <i class="fa-solid fa-chevron-down text-sm"></i>
+                </span>
+              </div>
+            </summary>
+            <div class="mt-4 pt-4 border-t border-surface-100 text-sm text-surface-600 leading-relaxed whitespace-pre-line">
+              ${faq.answer}
+            </div>
+          </details>
+        `).join('');
+
+        if (focusId) {
+          setTimeout(() => {
+            const el = document.getElementById(`item-faq-${focusId}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
+      } catch (err) {
+        console.error("Error loading FAQs:", err);
+      }
+    }
+
+    async function loadStaffData() {
+      if (!_supabase) return;
+
+      try {
+        const { data: staff, error } = await _supabase
+          .from('staff')
+          .select('*')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+
+        const container = document.getElementById('staff-grid-cards');
+
+        if (error || !staff || staff.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full p-8 rounded-xl border border-surface-200 bg-white text-center text-surface-500 text-xs">
+              Belum ada data tim staff yang ditambahkan.
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = staff.map(st => `
+          <div class="staff-card-item p-5 rounded-xl border border-surface-200 bg-white flex items-center justify-between gap-4" data-category="${st.category}">
+            <div class="flex items-center gap-4">
+              <img src="${st.image_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80'}" alt="${st.name}" class="w-14 h-14 rounded-full object-cover border border-surface-200" />
+              <div class="space-y-0.5">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-base text-surface-950">${st.name}</h3>
+                  <span class="text-[10px] font-extrabold uppercase bg-brand-100 text-brand-800 px-2 py-0.5 rounded">${st.position}</span>
+                </div>
+                ${st.whatsapp ? `<p class="text-xs text-surface-500 font-mono">${st.whatsapp}</p>` : ''}
+                <p class="text-xs text-surface-600">${st.description || ''}</p>
+              </div>
+            </div>
+            ${st.whatsapp ? `
+              <a href="https://wa.me/${st.whatsapp.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener noreferrer" class="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors text-lg" title="WhatsApp">
+                <i class="fa-brands fa-whatsapp"></i>
+              </a>
+            ` : ''}
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error("Error loading staff:", err);
+      }
+    }
+
+    /* ==========================================
+       4. HERO CAROUSEL LOGIC
+       ========================================== */
+    async function loadCarousel() {
+      if (!_supabase) return;
+
+      try {
+        const { data: carousel, error } = await _supabase
+          .from('carousel')
+          .select('*')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+
+        if (error || !carousel || carousel.length === 0) return;
+
+        const section = document.getElementById('carousel-section');
+        const track = document.getElementById('carousel-track');
+        const dots = document.getElementById('carousel-dots');
+
+        carouselSlidesCount = carousel.length;
+        section.classList.remove('hidden');
+
+        track.innerHTML = carousel.map((item, idx) => `
+          <div class="carousel-slide relative cursor-pointer" onclick="handleCarouselClick('${item.link_type}', '${item.link_id}', '${item.link_url}')">
+            <img src="${item.image_url}" alt="${item.title || 'Carousel Slide'}" />
+            <div class="absolute inset-0 bg-gradient-to-t from-surface-950/90 via-surface-950/30 to-transparent flex flex-col justify-end p-6 text-white pointer-events-none">
+              ${item.title ? `<h3 class="font-display font-bold text-lg sm:text-2xl">${item.title}</h3>` : ''}
+              ${item.description ? `<p class="text-xs sm:text-sm text-surface-300 line-clamp-1">${item.description}</p>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        dots.innerHTML = carousel.map((_, idx) => `
+          <button onclick="goToSlide(${idx})" class="w-2 h-2 rounded-full bg-white/50 transition-all ${idx === 0 ? 'bg-white w-5' : ''}" id="carousel-dot-${idx}"></button>
+        `).join('');
+
+        startCarouselTimer();
+
+      } catch (err) {
+        console.error("Error loading carousel:", err);
+      }
+    }
+
+    function handleCarouselClick(type, id, url) {
+      if (type === 'event' && id) {
+        window.location.hash = `#event=${id}`;
+      } else if (type === 'info' && id) {
+        window.location.hash = `#info=${id}`;
+      } else if (url) {
+        window.open(url, '_blank');
+      }
+    }
+
+    function goToSlide(index) {
+      currentSlideIndex = index;
+      const track = document.getElementById('carousel-track');
+      if (track) {
+        track.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+      }
+      for (let i = 0; i < carouselSlidesCount; i++) {
+        const dot = document.getElementById(`carousel-dot-${i}`);
+        if (dot) {
+          if (i === currentSlideIndex) {
+            dot.className = "w-5 h-2 rounded-full bg-white transition-all";
+          } else {
+            dot.className = "w-2 h-2 rounded-full bg-white/50 transition-all";
+          }
+        }
+      }
+    }
+
+    function moveCarousel(direction) {
+      if (carouselSlidesCount === 0) return;
+      currentSlideIndex = (currentSlideIndex + direction + carouselSlidesCount) % carouselSlidesCount;
+      goToSlide(currentSlideIndex);
+    }
+
+    function startCarouselTimer() {
+      if (carouselInterval) clearInterval(carouselInterval);
+      carouselInterval = setInterval(() => {
+        moveCarousel(1);
+      }, 5000);
+    }
+
+    /* ==========================================
+       5. SERVER STATUS & MAINTENANCE LOGIC
+       ========================================== */
+    async function checkServerStatus() {
+      const badgeText = document.getElementById('server-status-text');
+      const liveOnlineCount = document.getElementById('live-online-count');
+
+      if (_supabase) {
+        try {
+          const { data: settings } = await _supabase
+            .from('server_settings')
+            .select('maintenance_mode')
+            .single();
+
+          if (settings && settings.maintenance_mode) {
+            badgeText.innerHTML = `<span class="text-red-600 font-bold">MAINTENANCE MODE</span> — Server Sedang Dalam Perbaikan`;
+            liveOnlineCount.innerText = "OFF";
+            return;
+          }
+        } catch (e) {
+          console.warn("Skip server maintenance check");
+        }
+      }
+
+      try {
+        const res = await fetch('https://api.mcsrvstat.us/2/play.kyuryu.my.id');
+        const data = await res.json();
+
+        if (data.online) {
+          badgeText.innerHTML = `<span class="text-emerald-600 font-bold">SERVER ONLINE</span> — Version ${data.version || '1.20.x'}`;
+          liveOnlineCount.innerText = `${data.players.online}/${data.players.max}`;
+        } else {
+          badgeText.innerHTML = `<span class="text-amber-600 font-bold">SERVER OFFLINE</span>`;
+          liveOnlineCount.innerText = "0";
+        }
+      } catch (err) {
+        badgeText.innerHTML = `<span class="text-emerald-600 font-bold">SERVER ONLINE</span>`;
+        liveOnlineCount.innerText = "Online";
+      }
+    }
+
+    /* ==========================================
+       6. SHARE & DEEP LINK SYSTEM
+       ========================================== */
+    function shareItem(type, id, title) {
+      const shareUrl = `${window.location.origin}${window.location.pathname}#${type}=${id}`;
+      if (navigator.share) {
+        navigator.share({
+          title: title || 'KyuryuSMP',
+          url: shareUrl
+        }).catch(() => {});
+      } else {
+        copyToClipboard(shareUrl, 'Link tautan berhasil disalin!');
+      }
+    }
+
+    /* ==========================================
+       7. NOTIFICATION LOGIC (RED DOTS)
+       ========================================== */
+    async function checkNotifications() {
+      if (!_supabase) return;
+
+      try {
+        const lastReadEvents = localStorage.getItem('kyuryu_read_events') || '1970-01-01T00:00:00Z';
+        const lastReadInfo = localStorage.getItem('kyuryu_read_info') || '1970-01-01T00:00:00Z';
+        const lastReadFaq = localStorage.getItem('kyuryu_read_faq') || '1970-01-01T00:00:00Z';
+
+        const { data: latestEvent } = await _supabase.from('events').select('created_at').order('created_at', { ascending: false }).limit(1);
+        const { data: latestInfo } = await _supabase.from('news').select('created_at').order('created_at', { ascending: false }).limit(1);
+        const { data: latestFaq } = await _supabase.from('faqs').select('updated_at').order('updated_at', { ascending: false }).limit(1);
+
+        let hasNew = false;
+
+        if (latestEvent && latestEvent.length > 0 && new Date(latestEvent[0].created_at) > new Date(lastReadEvents)) {
+          showRedDot('events', true);
+          hasNew = true;
+        }
+
+        if (latestInfo && latestInfo.length > 0 && new Date(latestInfo[0].created_at) > new Date(lastReadInfo)) {
+          showRedDot('info', true);
+          hasNew = true;
+        }
+
+        if (latestFaq && latestFaq.length > 0 && new Date(latestFaq[0].updated_at) > new Date(lastReadFaq)) {
+          showRedDot('faq', true);
+          hasNew = true;
+        }
+
+        if (hasNew) {
+          const mobileTrigger = document.getElementById('dot-mobile-trigger');
+          if (mobileTrigger) mobileTrigger.classList.remove('hidden');
+        }
+
+      } catch (e) {
+        console.warn("Notification check failed", e);
+      }
+    }
+
+    function showRedDot(section, visible) {
+      const desktopDot = document.getElementById(`dot-${section}-desktop`);
+      const mobileDot = document.getElementById(`dot-${section}-mobile`);
+      if (visible) {
+        if (desktopDot) desktopDot.classList.remove('hidden');
+        if (mobileDot) mobileDot.classList.remove('hidden');
+      } else {
+        if (desktopDot) desktopDot.classList.add('hidden');
+        if (mobileDot) mobileDot.classList.add('hidden');
+      }
+    }
+
+    function markAsRead(section) {
+      localStorage.setItem(`kyuryu_read_${section}`, new Date().toISOString());
+      showRedDot(section, false);
+    }
+
+    /* Realtime Subscriptions */
+    function setupRealtime() {
+      if (!_supabase) return;
+
+      _supabase.channel('public-updates')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'server_settings' }, () => checkServerStatus())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
+          checkNotifications();
+          if (window.location.hash.includes('events')) loadEventsData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'news' }, () => {
+          checkNotifications();
+          if (window.location.hash.includes('info')) loadNewsData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'staff' }, () => {
+          loadStaffData();
+        })
+        .subscribe();
+    }
+
+    /* ==========================================
+       8. UTILITIES, MOBILE DRAWER & INITIALIZATION
+       ========================================== */
+    function copyToClipboard(text, successMsg) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(successMsg);
+      }).catch(err => {
+        console.error('Clipboard error: ', err);
+      });
+    }
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMessage.innerText = message;
+      toastIcon.className = isError 
+        ? "fa-solid fa-circle-exclamation text-red-400 text-base"
+        : "fa-solid fa-circle-check text-emerald-400 text-base";
+
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      
+      setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 3000);
+    }
+
+    /* ==========================================
+       9. DARK MODE / LIGHT MODE THEME TOGGLE
+       ========================================== */
+    const THEME_STORAGE_KEY = 'kyuryu-theme';
+
+    function applyTheme(isDark) {
+      document.documentElement.classList.toggle('dark', isDark);
+
+      const iconConfigs = [
+        { el: document.getElementById('theme-icon-desktop'), size: 'text-sm' },
+        { el: document.getElementById('theme-icon-mobile'), size: 'text-base' }
+      ];
+      const buttons = [document.getElementById('theme-toggle-desktop'), document.getElementById('theme-toggle-mobile')];
+      const label = isDark ? 'Aktifkan light mode' : 'Aktifkan dark mode';
+
+      iconConfigs.forEach(({ el, size }) => {
+        if (!el) return;
+        el.className = `fa-solid ${isDark ? 'fa-sun' : 'fa-moon'} ${size}`;
+      });
+
+      buttons.forEach(btn => {
+        if (!btn) return;
+        btn.setAttribute('aria-label', label);
+        btn.setAttribute('title', label);
+      });
+    }
+
+    function toggleTheme() {
+      const isDark = !document.documentElement.classList.contains('dark');
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, isDark ? 'dark' : 'light');
+      } catch (e) {}
+      applyTheme(isDark);
+    }
+
+    function initializeTheme() {
+      let savedTheme = 'light';
+      try {
+        savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'light';
+      } catch (e) {}
+      applyTheme(savedTheme === 'dark');
+    }
+
+    /* MOBILE DRAWER TOGGLE LOGIC */
+    let isMobileMenuOpen = false;
+
+    function toggleMobileMenu() {
+      const drawer = document.getElementById('mobile-drawer');
+      const backdrop = document.getElementById('mobile-backdrop');
+      const wrapper = document.getElementById('mobile-menu-wrapper');
+      const icon = document.getElementById('menu-icon');
+
+      isMobileMenuOpen = !isMobileMenuOpen;
+
+      if (isMobileMenuOpen) {
+        wrapper.classList.remove('pointer-events-none');
+        backdrop.classList.remove('pointer-events-none', 'opacity-0');
+        backdrop.classList.add('opacity-100');
+        drawer.classList.remove('translate-x-full');
+        drawer.classList.add('translate-x-0');
+        icon.className = "fa-solid fa-xmark text-base";
+        document.body.style.overflow = 'hidden';
+      } else {
+        drawer.classList.remove('translate-x-0');
+        drawer.classList.add('translate-x-full');
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        wrapper.classList.add('pointer-events-none');
+        icon.className = "fa-solid fa-bars text-base";
+        document.body.style.overflow = '';
+      }
+    }
+
+    function filterStaffPage(category) {
+      const items = document.querySelectorAll('.staff-card-item');
+      const tabs = ['all', 'owner', 'co-owner', 'dev-admin'];
+
+      tabs.forEach(tab => {
+        const btn = document.getElementById(`staff-tab-${tab}`);
+        if (btn) {
+          if (tab === category) {
+            btn.classList.remove('bg-surface-100', 'text-surface-700');
+            btn.classList.add('bg-surface-950', 'text-white');
+          } else {
+            btn.classList.remove('bg-surface-950', 'text-white');
+            btn.classList.add('bg-surface-100', 'text-surface-700');
+          }
+        }
+      });
+
+      items.forEach(item => {
+        if (category === 'all' || item.getAttribute('data-category') === category) {
+          item.classList.remove('hidden');
+          item.classList.add('flex');
+        } else {
+          item.classList.add('hidden');
+          item.classList.remove('flex');
+        }
+      });
+    }
+
+    /* Initialize Applications */
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeTheme();
+      checkServerStatus();
+      loadCarousel();
+      loadStaffData();
+      checkNotifications();
+      handleHashRouting();
+      setupRealtime();
+    });
+  </script>
+</body>
+</html>
